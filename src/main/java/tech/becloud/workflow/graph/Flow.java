@@ -34,7 +34,7 @@ public class Flow<T> implements Consumer<WorkflowContext<T>> {
     }
 
     private void persistContext(PersistContextScope persistenceScope, WorkflowContext<T> context) {
-        if (workflowContextRepository == null || persistenceScope == PersistContextScope.NONE) {
+        if (workflowContextRepository == null) {
             return;
         }
         switch (persistenceScope) {
@@ -49,11 +49,18 @@ public class Flow<T> implements Consumer<WorkflowContext<T>> {
             case ALL:
                 workflowContextRepository.save(context);
                 break;
+            case NONE:
+                break;
         }
     }
 
     public void setWorkflowContextRepository(WorkflowContextRepository<T> workflowContextRepository) {
         this.workflowContextRepository = workflowContextRepository;
+        // Propagate repository to subflows
+        nodes.values().stream().filter(SubflowNode.class::isInstance)
+                .map(node -> (SubflowNode<T>)node)
+                .map(SubflowNode::getFlow)
+                .forEach(flow -> setWorkflowContextRepository(workflowContextRepository));
     }
 
     public void setPersistContextScope(PersistContextScope persistContextScope) {
