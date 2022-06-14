@@ -1,6 +1,7 @@
 package tech.becloud.workflow.graph;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class SubflowBuilder<T> extends NodeBuilder<T, SubflowBuilder<T>> {
     private final Flow<T> flow;
@@ -33,8 +34,14 @@ public class SubflowBuilder<T> extends NodeBuilder<T, SubflowBuilder<T>> {
         return next;
     }
 
-    public RouterBuilder<T> route(String id) {
-        RouterBuilder<T> routerBuilder = flowBuilder.route(id);
+    public RouterBuilder<T> routeTo(String id, Predicate<? super T> predicate, String targetNodeId) {
+        RouterBuilder<T> routerBuilder = flowBuilder.routeTo(id, predicate, targetNodeId);
+        nextNode = id;
+        return routerBuilder;
+    }
+
+    public RouterBuilder<T> route(String id, Predicate<? super T> predicate, FlowBuilder<T> flowBuilder) {
+        RouterBuilder<T> routerBuilder = flowBuilder.route(id, predicate, flowBuilder);
         nextNode = id;
         return routerBuilder;
     }

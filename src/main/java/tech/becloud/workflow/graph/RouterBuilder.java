@@ -22,12 +22,12 @@ public class RouterBuilder<T> extends NodeBuilder<T, RouterBuilder<T>> {
         return new RouterNode<>(id, routes, defaultRoute, exceptionRoutes);
     }
 
-    RouterBuilder<T> routeIf(Predicate<T> predicate, String nodeId) {
+    RouterBuilder<T> routeIf(Predicate<? super T> predicate, String nodeId) {
         routes.add(new Route<>(predicate, nodeId));
         return this;
     }
 
-    RouterBuilder<T> routeIf(Predicate<T> predicate, FlowBuilder<T> builder) {
+    RouterBuilder<T> routeIf(Predicate<? super T> predicate, FlowBuilder<T> builder) {
         routes.add(new Route<>(predicate, builder.getStartNode()));
         flowBuilder.add(builder);
         return this;
