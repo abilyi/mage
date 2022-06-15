@@ -8,20 +8,21 @@ import java.util.List;
 
 public class RouterNode<T> extends Node<T> {
 
-    private List<Route<T>> routes;
+    private final List<Route<? super T>> routes;
 
-    public RouterNode(String id, List<Route<T>> routes, String defaultRoute, List<ExceptionRoute> exceptionRoutes) {
+    public RouterNode(String id, List<Route<? super T>> routes, String defaultRoute, List<ExceptionRoute> exceptionRoutes) {
         super(id, exceptionRoutes);
-        this.routes = new ArrayList<>(routes);
-        this.routes.add(new Route<>(t -> true, defaultRoute));
+        ArrayList<Route<? super T>> allRoutes = new ArrayList<>(routes);
+        allRoutes.add(new Route<>(t -> true, defaultRoute));
+        this.routes = List.copyOf(allRoutes);
     }
 
     @Override
     public String executeAction(WorkflowContext<T> workflowContext) {
         T context = workflowContext.getContext();
-        for (Route<T> route : routes) {
-            if (route.test(context)) {
-                return route.getNodeId();
+        for (Route<? super T> route : routes) {
+            if (route.predicate.test(context)) {
+                return route.nodeId;
             }
         }
         throw new IllegalStateException("No default route found, abandon execution");

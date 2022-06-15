@@ -1,11 +1,8 @@
 package tech.becloud.workflow.graph;
 
-import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
 public abstract class NodeBuilder<T, N extends NodeBuilder<T, N>> {
 
     protected final FlowBuilder<T> flowBuilder;
@@ -27,5 +24,28 @@ public abstract class NodeBuilder<T, N extends NodeBuilder<T, N>> {
 
     public FlowBuilder<T> done() {
         return flowBuilder;
+    }
+
+    /**
+     *
+     * @return parent {@link FlowBuilder}, this NodeBuilder belongs to.
+     */
+    public FlowBuilder<T> getFlowBuilder() {
+        return flowBuilder;
+    }
+
+    /**
+     * @return This node (step) id
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public List<ExceptionRoute> getExceptionRoutes() {
+        return exceptionRoutes;
     }
 }

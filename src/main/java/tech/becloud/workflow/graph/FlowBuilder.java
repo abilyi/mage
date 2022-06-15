@@ -91,7 +91,7 @@ public class FlowBuilder<T> {
         if (nodeBuilders.containsKey(id)) {
             throw new IllegalArgumentException(String.format(NODE_ALREADY_EXIST, id));
         }
-        RouterBuilder<T> builder = new RouterBuilder<>(this, id).routeIf(predicate, nextNode);
+        RouterBuilder<T> builder = new RouterBuilder<>(this, id).routeTo(predicate, nextNode);
         nodeBuilders.put(id, builder);
         return builder;
     }
@@ -112,13 +112,14 @@ public class FlowBuilder<T> {
         if (nodeBuilders.containsKey(id)) {
             throw new IllegalArgumentException(String.format(NODE_ALREADY_EXIST, id));
         }
-        RouterBuilder<T> builder = new RouterBuilder<>(this, id).routeIf(predicate, flowBuilder);
+        RouterBuilder<T> builder = new RouterBuilder<>(this, id).route(predicate, flowBuilder);
         nodeBuilders.put(id, builder);
         return builder;
     }
 
     /**
-     * Adds a subflow call step to workflow
+     * Adds a subflow call step to workflow. Calls of subflow from subflow is supported.
+     * The same flow may be used as main in one workflow and as subflow in another.
      * @param id workflow step id
      * @param flow flow to execute as subflow
      * @return a builder for {@link SubflowNode} implementing such step
@@ -133,7 +134,8 @@ public class FlowBuilder<T> {
     }
 
     /**
-     * Adds a subflow call step to workflow
+     * Adds a subflow call step to workflow. Calls of subflow from subflow is supported.
+     * The same flow may be used as main in one workflow and as subflow in another.
      * @param id subflow step id
      * @param flowBean bean name to lookup {@link Flow} instance
      * @return

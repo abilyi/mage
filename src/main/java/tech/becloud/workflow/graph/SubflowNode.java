@@ -1,15 +1,11 @@
 package tech.becloud.workflow.graph;
 
-import lombok.Getter;
-import lombok.Setter;
 import tech.becloud.workflow.model.WorkflowContext;
 import tech.becloud.workflow.persistence.PersistContextScope;
 
 import java.util.List;
 import java.util.Optional;
 
-@Getter
-@Setter
 public class SubflowNode<T> extends Node<T> {
 
     private final Flow<T> flow;
@@ -52,5 +48,13 @@ public class SubflowNode<T> extends Node<T> {
     public void setPersistenceScope(PersistContextScope persistContextScope) {
         this.persistContextScope = persistContextScope;
         flow.setPersistContextScope(persistContextScope);
+    }
+
+    public Flow<T> getFlow() {
+        return flow;
+    }
+
+    public String getNextNodeId() {
+        return nextNodeId;
     }
 }

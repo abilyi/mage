@@ -45,7 +45,7 @@ public abstract class Node<T> implements Function<WorkflowContext<T>, String> {
         }
         for (ExceptionRoute exceptionRoute: getExceptionRoutes()) {
             if (exceptionRoute.test(cause)) {
-                return exceptionRoute.getNodeId();
+                return exceptionRoute.nodeId;
             }
         }
         throw executionException;

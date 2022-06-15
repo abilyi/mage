@@ -9,11 +9,24 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+/**
+ * Represents a workflow step executing a single action. May be executed conditionally on supplied predicate.
+ * On successful execution it returns a next step to be executed, or null if no such step defined.
+ * On exception next step may be defined per exception type, otherwise exception is delivered to a caller.
+ * @param <T> type parameter representing type of data processed by the flow.
+ */
 public class ActionNode<T> extends Node<T> {
     private final Consumer<? super T> action;
     private final Predicate<? super T> predicate;
     protected final String nextNodeId;
 
+    /**
+     * Constructor, package private as intended way to create nodes is via builders.
+     * @param id step (node) id
+     * @param action action to perform, represented as {@link Consumer<? super T>} implementation
+     * @param nextNodeId id of next step to execute on successful completion
+     * @param exceptionRoutes next steps per exception type on exceptional action completion
+     */
     ActionNode(String id, Consumer<? super T> action, String nextNodeId, List<ExceptionRoute> exceptionRoutes) {
         super(id, exceptionRoutes);
         this.action = action;
@@ -21,6 +34,14 @@ public class ActionNode<T> extends Node<T> {
         this.nextNodeId = nextNodeId;
     }
 
+    /**
+     * Constructor, package private as intended way to create nodes is via builders.
+     * @param id step (node) id
+     * @param predicate to test for conditional execution
+     * @param action action to perform, represented as {@link Consumer<? super T>} implementation
+     * @param nextNodeId id of next step to execute on successful completion
+     * @param exceptionRoutes next steps per exception type on exceptional action completion
+     */
     ActionNode(String id, Predicate<? super T> predicate, Consumer<? super T> action, String nextNodeId,
                List<ExceptionRoute> exceptionRoutes) {
         super(id, exceptionRoutes);
@@ -46,5 +67,26 @@ public class ActionNode<T> extends Node<T> {
                         .map(PersistContext::value)
                         .orElse(PersistContextScope.ALL)
         );
+    }
+
+    /**
+     * @return action to be performed
+     */
+    public Consumer<? super T> getAction() {
+        return action;
+    }
+
+    /**
+     * @return predicate for conditional execution, if any
+     */
+    public Predicate<? super T> getPredicate() {
+        return predicate;
+    }
+
+    /**
+     * @return id of next step (node) on successful completion. May be {@code null} which means flow completion.
+     */
+    public String getNextNodeId() {
+        return nextNodeId;
     }
 }

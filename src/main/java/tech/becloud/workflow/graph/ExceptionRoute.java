@@ -7,8 +7,15 @@ import java.util.function.Predicate;
  * The rule for definition order for such routes are the same as for exception handling.
  */
 public class ExceptionRoute implements Predicate<Exception> {
-    private final Class<? extends Exception> matchingClass;
-    private final String nodeId;
+    /**
+     * An exception type to match. Note that subclassed will be matched as well.
+     */
+    public final Class<? extends Exception> matchingClass;
+
+    /**
+     * id of step (node) to execute if exception matches, i.e. is of supplied class or a subclass of it.
+     */
+    public final String nodeId;
 
     public ExceptionRoute(Class<? extends Exception> matchingClass, String nodeId) {
         this.matchingClass = matchingClass;
@@ -18,21 +25,5 @@ public class ExceptionRoute implements Predicate<Exception> {
     @Override
     public boolean test(Exception e) {
         return matchingClass == null || matchingClass.isInstance(e);
-    }
-
-    /**
-     * An exception type to match. Note that subclassed will be matched as well.
-     * @return an Exception class.
-     */
-    public Class<? extends Exception> getMatchingClass() {
-        return matchingClass;
-    }
-
-    /**
-     *
-     * @return id of step (node) to execute if exception matches, i.e. is of supplied class or a subclass of it.
-     */
-    public String getNodeId() {
-        return nodeId;
     }
 }
