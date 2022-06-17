@@ -6,29 +6,29 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ActionNodeTest extends SimpleNodeTestBase {
+class ActionNodeTest extends FlowTestBase {
 
     @Test
     void testSuccessfulExecution() {
-        ActionNode<TestContext> node = new ActionNode<>("test", new Consumer1(), "next", Collections.emptyList());
+        ActionNode<TestContext> node = new ActionNode<>("test", new TrackingConsumer("Step 1"), "next", Collections.emptyList());
         String nextId = node.apply(workflowContext);
-        assertTrue(context.action1);
         assertEquals("next", nextId);
+        assertEquals(1, context.history.size());
+        assertEquals("Step 1", context.history.get(0));
     }
 
     @Test
     void testConditionalExecution() {
-        ActionNode<TestContext> node = new ActionNode<>("test", t -> t.condition, new Consumer1(), "next", Collections.emptyList());
+        ActionNode<TestContext> node = new ActionNode<>("test", t -> t.condition, new TrackingConsumer("Step 1"), "next", Collections.emptyList());
         String nextId = node.apply(workflowContext);
-        assertFalse(context.action1);
+        assertEquals(0, context.history.size());
         assertEquals("next", nextId);
         context.condition = true;
         nextId = node.apply(workflowContext);
-        assertTrue(context.action1);
+        assertEquals(1, context.history.size());
+        assertEquals("Step 1", context.history.get(0));
         assertEquals("next", nextId);
     }
 

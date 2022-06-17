@@ -51,6 +51,9 @@ public abstract class Node<T> implements Function<WorkflowContext<T>, String> {
         throw executionException;
     }
 
+    /**
+     * @return Scope of context to be persisted. This is an optimization that allows to reduce amount of data to store.
+     */
     abstract PersistContextScope getPersistenceScope();
 
     protected void enterNode(WorkflowContext<T> workflowContext) {
@@ -59,6 +62,10 @@ public abstract class Node<T> implements Function<WorkflowContext<T>, String> {
     protected void exitNode(WorkflowContext<T> workflowContext) {
     }
 
+    /**
+     * Sets default scope of context to be persisted. Node still may reduce this scope for it's execution.
+     * @param persistContextScope
+     */
     public void setPersistenceScope(PersistContextScope persistContextScope) {
         this.persistContextScope = persistContextScope;
     }

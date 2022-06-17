@@ -29,7 +29,7 @@ public class ActionNodeBuilder<T> extends NodeBuilder<T, ActionNodeBuilder<T>> {
         if (node != null) {
             return node;
         }
-        node = new ActionNode<T>(id, action, nextNode, exceptionRoutes);
+        node = new ActionNode<T>(id, predicate, action, nextNode, exceptionRoutes);
         return node;
     }
 

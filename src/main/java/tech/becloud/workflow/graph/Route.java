@@ -2,7 +2,11 @@ package tech.becloud.workflow.graph;
 
 import java.util.function.Predicate;
 
-public final class Route<T> {
+/**
+ * Supplemental class for RouterNode with predicate to match and step (node) id to follow.
+ * @param <T>
+ */
+final class Route<T> {
     public final Predicate<? super T> predicate;
     public final String nodeId;
 
