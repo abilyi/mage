@@ -32,3 +32,21 @@ Though refactoring to achieve this is planned
 
 ## Examples
 
+## How it works
+There are 3 node types: action, router and subflow.  
+Action node executes a single action. For convenience You may supply also a predicate making action execution
+conditional. Action node has at most one successor node.  
+Router node is an if - else if - else node, allowing several paths of execution. So, it has many successors and selects
+one according to first predicate returned true.  
+Subflow node controls a subflow execution treated as a single action. Subflow node has at most one successor node.  
+Each node has an exception handling that allows to continue execution on distinct path in case of exception.  
+Nodes a referenced indirectly, by node id. Workflow completes when reaches a node without successor (i. e. next node id
+is null). On router node it means that matched predicate corresponds to a null node id.  
+
+## Usage hints
+
+* For router nodes it is recommended to use new flow builder for each path instead of just node name unless referenced
+node is defined earlier in the flow and You want to make a cycle.
+* It is safe use the same extra FlowBuilder several times, it will reference the same part of graph.
+* Use beans for consumers and predicates. If You find it boring to declare some of them as beans, provide a cache to
+bean resolver. This will allow You to use flow definitions once they get implemented.
