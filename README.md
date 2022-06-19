@@ -1,9 +1,9 @@
-# LiWE
-LiWE stands for Lightweight Workflow Engine. A lot of applications needs to execute series of actions with some
-if-else branching. Sometimes these flows are big enough, sometimes they are small. Bigger ones typically treated as
-workflows and BPM engines like Camunda are used to design and execute them. But what to do with smaller cases? What if
-You consider BPM engine too heavyweight and complicated?  
-So, here is LiWE.  
+# MAGE
+MAGE stands for Minimalistic Actions Graph Executor. Some applications needs to execute a sequence of actions with 
+some conditional branching. Sometimes these flows are big enough, sometimes they are small. Bigger ones typically
+treated as workflows and BPM engines like Camunda are used to design and execute them. But what to do with smaller
+cases? What if You consider BPM engine too heavyweight and complicated?  
+So, here is MAGE.  
 Note that project is in preview stage, first release is expected till the end of July 2022.
 
 ## Features:
