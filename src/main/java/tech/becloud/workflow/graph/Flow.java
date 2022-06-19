@@ -40,6 +40,10 @@ public class Flow<T extends UserContext> implements Consumer<WorkflowContext<T>>
             }
             execution.getCurrentNodePath().set(subflowLevel, currentNodeId);
             persistContext(currentNode.getPersistenceScope(), context);
+            if (execution.isPauseRequested()) {
+                execution.setExecutionState(ExecutionState.PAUSED);
+                execution.setPauseRequested(false);
+            }
         } while (currentNodeId != null && execution.getExecutionState() == ExecutionState.RUNNING);
         if (currentNodeId == null && subflowLevel == 0) {
             execution.setExecutionState(ExecutionState.COMPLETED);

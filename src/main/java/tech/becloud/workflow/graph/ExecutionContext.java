@@ -14,6 +14,7 @@ public class ExecutionContext<T> {
     private WorkflowExceptionHandler<T> exceptionHandler;
     private BiConsumer<? super T, ExecutionState> completionHandler;
     private ExecutionState executionState;
+    private volatile boolean pauseRequested;
     private final List<String> currentNodePath;
     private int subflowDepth;
 
@@ -108,6 +109,19 @@ public class ExecutionContext<T> {
         }
         String[] path = executionPoint.split("/");
         currentNodePath.addAll(Arrays.asList(path));
+    }
+
+    public boolean isPauseRequested() {
+        return pauseRequested;
+    }
+
+    /**
+     * Passing {@code true} means a request to pause execution as soon as possible, i.e. right after current node
+     * execution completes.
+     * @param pauseRequested
+     */
+    public void setPauseRequested(boolean pauseRequested) {
+        this.pauseRequested = pauseRequested;
     }
 
     List<String> getCurrentNodePath() {

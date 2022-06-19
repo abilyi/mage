@@ -24,4 +24,8 @@ public class WorkflowContext<T extends UserContext> {
     public UUID getExecutionId() {
         return executionContext.getExecutionId();
     }
+
+    public void requestPause() {
+        executionContext.setPauseRequested(true);
+    }
 }
