@@ -34,7 +34,8 @@ class ActionNodeTest extends FlowTestBase {
 
     @Test
     void testHandledException() {
-        List<ExceptionRoute> exceptionRoutes = List.of(new ExceptionRoute(IllegalStateException.class, "errorPath"));
+        List<ExceptionRoute<TestContext>> exceptionRoutes = List.of(
+                new ExceptionRoute<TestContext>(IllegalStateException.class, "errorPath"));
         ActionNode<TestContext> node = new ActionNode<>("test", new ThrowingConsumer(), "nextNode", exceptionRoutes);
         String nextNode = node.apply(workflowContext);
         assertEquals("errorPath", nextNode);
@@ -42,7 +43,8 @@ class ActionNodeTest extends FlowTestBase {
 
     @Test
     void testUnhandledException() {
-        List<ExceptionRoute> exceptionRoutes = List.of(new ExceptionRoute(NullPointerException.class, "errorPath"));
+        List<ExceptionRoute<TestContext>> exceptionRoutes = List.of(
+                new ExceptionRoute<TestContext>(NullPointerException.class, "errorPath"));
         ActionNode<TestContext> node = new ActionNode<>("test", new ThrowingConsumer(), "next", exceptionRoutes);
         assertThrows(WokflowExecutionException.class, () -> node.apply(workflowContext));
     }

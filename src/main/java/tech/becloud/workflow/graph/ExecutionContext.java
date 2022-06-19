@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
-public class ExecutionContext {
+public class ExecutionContext<T> {
     private String serviceInstanceId;
     private final UUID executionId;
     private final String workflowName;
     private final int workflowVersion;
+    private WorkflowExceptionHandler<T> exceptionHandler;
+    private BiConsumer<? super T, ExecutionState> completionHandler;
+    private ExecutionState executionState;
     private final List<String> currentNodePath;
     private int subflowDepth;
 
@@ -62,14 +66,41 @@ public class ExecutionContext {
         return workflowVersion;
     }
 
+    public WorkflowExceptionHandler<T> getExceptionHandler() {
+        return exceptionHandler;
+    }
+
+    public void setExceptionHandler(WorkflowExceptionHandler<T> exceptionHandler) {
+        this.exceptionHandler = exceptionHandler;
+    }
+
+    public BiConsumer<? super T, ExecutionState> getCompletionHandler() {
+        return completionHandler;
+    }
+
+    public void setCompletionHandler(BiConsumer<? super T, ExecutionState> completionHandler) {
+        this.completionHandler = completionHandler;
+    }
+
+    public ExecutionState getExecutionState() {
+        return executionState;
+    }
+
+    public void setExecutionState(ExecutionState executionState) {
+        this.executionState = executionState;
+    }
+
     /**
-     *
      * @return
      */
     public String getExecutionPoint() {
         return String.join("/", currentNodePath);
     }
 
+    /**
+     *
+     * @param executionPoint
+     */
     public void setExecutionPoint(String executionPoint) {
         currentNodePath.clear();
         if (executionPoint == null || executionPoint.isEmpty()) {

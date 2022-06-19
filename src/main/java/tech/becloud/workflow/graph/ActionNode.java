@@ -1,5 +1,6 @@
 package tech.becloud.workflow.graph;
 
+import tech.becloud.workflow.model.UserContext;
 import tech.becloud.workflow.model.WorkflowContext;
 import tech.becloud.workflow.persistence.PersistContext;
 import tech.becloud.workflow.persistence.PersistContextScope;
@@ -15,7 +16,7 @@ import java.util.function.Predicate;
  * On exception next step may be defined per exception type, otherwise exception is delivered to a caller.
  * @param <T> type parameter representing type of data processed by the flow.
  */
-public class ActionNode<T> extends Node<T> {
+public class ActionNode<T extends UserContext> extends Node<T> {
     private final Consumer<? super T> action;
     private final Predicate<? super T> predicate;
     protected final String nextNodeId;
@@ -23,11 +24,11 @@ public class ActionNode<T> extends Node<T> {
     /**
      * Constructor, package private as intended way to create nodes is via builders.
      * @param id step (node) id
-     * @param action action to perform, represented as {@link Consumer<? super T>} implementation
+     * @param action action to perform, represented as {@link Consumer} implementation
      * @param nextNodeId id of next step to execute on successful completion
      * @param exceptionRoutes next steps per exception type on exceptional action completion
      */
-    ActionNode(String id, Consumer<? super T> action, String nextNodeId, List<ExceptionRoute> exceptionRoutes) {
+    ActionNode(String id, Consumer<? super T> action, String nextNodeId, List<ExceptionRoute<T>> exceptionRoutes) {
         super(id, exceptionRoutes);
         this.action = action;
         this.predicate = null;
@@ -38,12 +39,12 @@ public class ActionNode<T> extends Node<T> {
      * Constructor, package private as intended way to create nodes is via builders.
      * @param id step (node) id
      * @param predicate to test for conditional execution
-     * @param action action to perform, represented as {@link Consumer<? super T>} implementation
+     * @param action action to perform, represented as {@link Consumer} implementation
      * @param nextNodeId id of next step to execute on successful completion
      * @param exceptionRoutes next steps per exception type on exceptional action completion
      */
     ActionNode(String id, Predicate<? super T> predicate, Consumer<? super T> action, String nextNodeId,
-               List<ExceptionRoute> exceptionRoutes) {
+               List<ExceptionRoute<T>> exceptionRoutes) {
         super(id, exceptionRoutes);
         this.action = action;
         this.predicate = predicate;

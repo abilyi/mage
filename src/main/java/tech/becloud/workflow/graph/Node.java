@@ -1,20 +1,21 @@
 package tech.becloud.workflow.graph;
 
-import lombok.Getter;
+import tech.becloud.workflow.model.UserContext;
 import tech.becloud.workflow.model.WorkflowContext;
 import tech.becloud.workflow.persistence.PersistContextScope;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
-@Getter
-public abstract class Node<T> implements Function<WorkflowContext<T>, String> {
+public abstract class Node<T extends UserContext> implements Function<WorkflowContext<T>, String> {
 
     private final String id;
-    protected final List<ExceptionRoute> exceptionRoutes;
+    protected final List<ExceptionRoute<T>> exceptionRoutes;
     protected PersistContextScope persistContextScope;
+    protected boolean pause;
 
-    Node(String id, List<ExceptionRoute> exceptionRoutes) {
+    Node(String id, List<ExceptionRoute<T>> exceptionRoutes) {
         this.id = id;
         this.exceptionRoutes = List.copyOf(exceptionRoutes);
     }
@@ -33,18 +34,19 @@ public abstract class Node<T> implements Function<WorkflowContext<T>, String> {
     protected abstract String executeAction(WorkflowContext<T> context);
 
     protected String routeOnException(Exception e, WorkflowContext<T> context) {
-        Exception cause;
+        Throwable cause;
         WokflowExecutionException executionException;
         if (e instanceof WokflowExecutionException) {
-            cause = (Exception) e.getCause();
+            cause = e.getCause();
             executionException = (WokflowExecutionException) e;
         } else {
             // TODO log an exception
             cause = e;
             executionException = new WokflowExecutionException(e, context.getExecutionContext().getExecutionPoint());
         }
-        for (ExceptionRoute exceptionRoute: getExceptionRoutes()) {
+        for (ExceptionRoute<T> exceptionRoute: getExceptionRoutes()) {
             if (exceptionRoute.test(cause)) {
+                Optional.ofNullable(exceptionRoute.handler).ifPresent(h -> h.accept(context.getContext(), cause));
                 return exceptionRoute.nodeId;
             }
         }
@@ -62,6 +64,29 @@ public abstract class Node<T> implements Function<WorkflowContext<T>, String> {
     protected void exitNode(WorkflowContext<T> workflowContext) {
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public List<ExceptionRoute<T>> getExceptionRoutes() {
+        return exceptionRoutes;
+    }
+
+    public boolean isPause() {
+        return pause;
+    }
+
+    void setPause(boolean pause) {
+        this.pause = pause;
+    }
+
+    /**
+     * @return default scope of context to be persisted. Node still may reduce this scope for it's execution.
+     */
+    public PersistContextScope getPersistContextScope() {
+        return persistContextScope;
+    }
+
     /**
      * Sets default scope of context to be persisted. Node still may reduce this scope for it's execution.
      * @param persistContextScope
@@ -69,4 +94,5 @@ public abstract class Node<T> implements Function<WorkflowContext<T>, String> {
     public void setPersistenceScope(PersistContextScope persistContextScope) {
         this.persistContextScope = persistContextScope;
     }
+
 }

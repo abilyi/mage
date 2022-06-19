@@ -1,13 +1,12 @@
 package tech.becloud.workflow.graph;
 
-import lombok.Getter;
+import tech.becloud.workflow.model.UserContext;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-@Getter
-public class RouterBuilder<T> extends NodeBuilder<T, RouterBuilder<T>> {
+public class RouterBuilder<T extends UserContext> extends NodeBuilder<T, RouterBuilder<T>> {
 
     private final List<Route<? super T>> routes;
     private String defaultRoute;
@@ -29,7 +28,7 @@ public class RouterBuilder<T> extends NodeBuilder<T, RouterBuilder<T>> {
      * @return builder for {@link RouterNode}
      */
     RouterBuilder<T> routeTo(Predicate<? super T> predicate, String nodeId) {
-        routes.add(new Route<>(predicate, nodeId));
+        routes.add(new Route<T>(predicate, nodeId));
         return this;
     }
 
@@ -40,7 +39,7 @@ public class RouterBuilder<T> extends NodeBuilder<T, RouterBuilder<T>> {
      * @return builder for {@link RouterNode}
      */
     RouterBuilder<T> route(Predicate<? super T> predicate, FlowBuilder<T> builder) {
-        routes.add(new Route<>(predicate, builder.getStartNode()));
+        routes.add(new Route<T>(predicate, builder.getStartNode()));
         flowBuilder.add(builder);
         return this;
     }
@@ -64,5 +63,19 @@ public class RouterBuilder<T> extends NodeBuilder<T, RouterBuilder<T>> {
         this.defaultRoute = builder.getStartNode();
         flowBuilder.add(builder);
         return this;
+    }
+
+    /**
+     * @return routes configured in this builder. Returned list can't be modified directly.
+     */
+    public List<Route<? super T>> getRoutes() {
+        return List.copyOf(routes);
+    }
+
+    /**
+     * @return default route configured in this builder.
+     */
+    public String getDefaultRoute() {
+        return defaultRoute;
     }
 }

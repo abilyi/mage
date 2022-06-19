@@ -1,19 +1,20 @@
 package tech.becloud.workflow.persistence;
 
 import tech.becloud.workflow.graph.ExecutionContext;
+import tech.becloud.workflow.model.UserContext;
 import tech.becloud.workflow.model.WorkflowContext;
 
 import java.util.UUID;
 
-public interface WorkflowContextRepository<T> {
+public interface WorkflowContextRepository<T extends UserContext> {
 
     T loadUserContext(UUID executionId, String executionPath);
 
     void saveUserContext(UUID executionId, String executionPath, T context);
 
-    ExecutionContext loadExecutionContext(UUID executionId);
+    ExecutionContext<T> loadExecutionContext(UUID executionId);
 
-    void saveExecutionContext(ExecutionContext executionContext);
+    void saveExecutionContext(ExecutionContext<T> executionContext);
 
     WorkflowContext<T> load(UUID executionId);
 

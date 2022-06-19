@@ -1,15 +1,27 @@
 package tech.becloud.workflow.model;
 
-import lombok.Getter;
 import tech.becloud.workflow.graph.ExecutionContext;
 
-@Getter
-public class WorkflowContext<T> {
-    private final ExecutionContext executionContext;
+import java.util.UUID;
+
+public class WorkflowContext<T extends UserContext> {
+    private final ExecutionContext<T> executionContext;
     private final T context;
 
-    public WorkflowContext(ExecutionContext executionContext, T context) {
+    public WorkflowContext(ExecutionContext<T> executionContext, T context) {
         this.executionContext = executionContext;
         this.context = context;
+    }
+
+    public ExecutionContext<T> getExecutionContext() {
+        return executionContext;
+    }
+
+    public T getContext() {
+        return context;
+    }
+
+    public UUID getExecutionId() {
+        return executionContext.getExecutionId();
     }
 }

@@ -1,22 +1,41 @@
 package tech.becloud.workflow.graph;
 
+import tech.becloud.workflow.model.UserContext;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
-public abstract class NodeBuilder<T, N extends NodeBuilder<T, N>> {
+public abstract class NodeBuilder<T extends UserContext, N extends NodeBuilder<T, N>> {
 
     protected final FlowBuilder<T> flowBuilder;
     protected final String id;
-    protected final List<ExceptionRoute> exceptionRoutes;
+    protected final List<ExceptionRoute<T>> exceptionRoutes;
+    protected boolean pause;
 
     protected NodeBuilder(FlowBuilder<T> flowBuilder, String id) {
         this.flowBuilder = flowBuilder;
         this.id = id;
         exceptionRoutes = new ArrayList<>();
+        this.pause = false;
     }
 
+    @SuppressWarnings("unchecked")
     public N onException(Class<? extends Exception> exceptionClass, String nodeId) {
-        exceptionRoutes.add(new ExceptionRoute(exceptionClass, nodeId));
+        exceptionRoutes.add(new ExceptionRoute<T>(exceptionClass, null, nodeId));
+        return (N) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public N onException(Class<? extends Throwable> exceptionClass, BiConsumer<? super T, Throwable> handler,
+                         String nodeId) {
+        exceptionRoutes.add(new ExceptionRoute<T>(exceptionClass, handler, nodeId));
+        return (N) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public N pause() {
+        this.pause = true;
         return (N) this;
     }
 
@@ -45,7 +64,7 @@ public abstract class NodeBuilder<T, N extends NodeBuilder<T, N>> {
      *
      * @return
      */
-    public List<ExceptionRoute> getExceptionRoutes() {
+    public List<ExceptionRoute<T>> getExceptionRoutes() {
         return exceptionRoutes;
     }
 }

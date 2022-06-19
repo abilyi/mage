@@ -1,10 +1,11 @@
 package tech.becloud.workflow.graph;
 
+import tech.becloud.workflow.model.UserContext;
 import tech.becloud.workflow.model.WorkflowContext;
 
 import java.util.concurrent.Callable;
 
-public class NodeCallable<T> implements Callable<String> {
+public class NodeCallable<T extends UserContext> implements Callable<String> {
     private final Node<T> node;
     private final WorkflowContext<T> context;
 

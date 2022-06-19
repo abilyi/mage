@@ -2,11 +2,12 @@ package tech.becloud.workflow.graph;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import tech.becloud.workflow.model.UserContext;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class ActionNodeBuilder<T> extends NodeBuilder<T, ActionNodeBuilder<T>> {
+public class ActionNodeBuilder<T extends UserContext> extends NodeBuilder<T, ActionNodeBuilder<T>> {
     @Setter
     private Predicate<? super T> predicate;
     private final Consumer<? super T> action;
@@ -30,6 +31,7 @@ public class ActionNodeBuilder<T> extends NodeBuilder<T, ActionNodeBuilder<T>> {
             return node;
         }
         node = new ActionNode<T>(id, predicate, action, nextNode, exceptionRoutes);
+        node.setPause(this.pause);
         return node;
     }
 

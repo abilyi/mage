@@ -14,8 +14,8 @@ class RouterNodeTest extends FlowTestBase {
     void testRouting() {
         List<Route<? super TestContext>> routes = List.of(new Route<TestContext>(t -> t.action1, "Step2"),
                 new Route<TestContext>(t -> t.action2, "Step3"));
-        List<ExceptionRoute> exceptionRoutes = List.of(
-                new ExceptionRoute(IllegalStateException.class, "IllegalStateRecovery"));
+        List<ExceptionRoute<TestContext>> exceptionRoutes = List.of(
+                new ExceptionRoute<TestContext>(IllegalStateException.class, "IllegalStateRecovery"));
         RouterNode<TestContext> node = new RouterNode<>("Route1", routes, "DefaultStep", exceptionRoutes);
         String path = node.apply(workflowContext);
         assertEquals("DefaultStep", path);
@@ -31,8 +31,8 @@ class RouterNodeTest extends FlowTestBase {
     void testHandledException() {
         List<Route<? super TestContext>> routes = List.of(new Route<TestContext>(t -> t.action1, "Step2"),
                 new Route<TestContext>(new ThrowingPredicate(), "Step3"));
-        List<ExceptionRoute> exceptionRoutes = List.of(
-                new ExceptionRoute(IllegalStateException.class, "IllegalStateRecovery"));
+        List<ExceptionRoute<TestContext>> exceptionRoutes = List.of(
+                new ExceptionRoute<TestContext>(IllegalStateException.class, "IllegalStateRecovery"));
         RouterNode<TestContext> node = new RouterNode<>("Route1", routes, "DefaultStep", exceptionRoutes);
         String path = node.apply(workflowContext);
         assertEquals("IllegalStateRecovery", path);
@@ -42,8 +42,8 @@ class RouterNodeTest extends FlowTestBase {
     void testUnhandledException() {
         List<Route<? super TestContext>> routes = List.of(new Route<TestContext>(t -> t.action1, "Step2"),
                 new Route<TestContext>(new ThrowingPredicate(), "Step3"));
-        List<ExceptionRoute> exceptionRoutes = List.of(
-                new ExceptionRoute(IllegalArgumentException.class, "IllegalArgumentRecovery"));
+        List<ExceptionRoute<TestContext>> exceptionRoutes = List.of(
+                new ExceptionRoute<TestContext>(IllegalArgumentException.class, "IllegalArgumentRecovery"));
         RouterNode<TestContext> node = new RouterNode<>("Route1", routes, "DefaultStep", exceptionRoutes);
         assertThrows(WokflowExecutionException.class, () -> node.apply(workflowContext));
     }

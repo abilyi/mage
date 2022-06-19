@@ -1,5 +1,7 @@
 package tech.becloud.workflow.graph;
 
+import tech.becloud.workflow.model.UserContext;
+
 import java.util.function.Consumer;
 
 /**
@@ -16,7 +18,7 @@ public interface BeanResolver {
      * @return a corresponding {@link Consumer} instance
      * @throws
      */
-    <T> Consumer<T> getConsumer(String name, Class<T> klass);
+    <T extends UserContext> Consumer<? super T> getConsumer(String name, Class<T> klass);
 
     /**
      * Performs lookup for a {@link Flow} bean by name, verifying that it is parametrized with given type
@@ -26,5 +28,5 @@ public interface BeanResolver {
      * @return a corresponding {@link Flow} instance
      * @throws
      */
-    <T> Flow<T> getFlow(String name, Class<T> klass);
+    <T extends UserContext> Flow<T> getFlow(String name, Class<T> klass);
 }

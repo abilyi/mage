@@ -12,8 +12,9 @@ public class FlowTestBase {
     @BeforeEach
     public void setupContext() {
         context = new TestContext();
-        ExecutionContext executionContext = new ExecutionContext("test", 1, UUID.randomUUID());
+        ExecutionContext<TestContext> executionContext = new ExecutionContext<>("test", 1, UUID.randomUUID());
         executionContext.getCurrentNodePath().add("test");
+        context.setExecutionId(executionContext.getExecutionId());
         workflowContext = new WorkflowContext<>(executionContext, context);
     }
 }

@@ -1,9 +1,11 @@
 package tech.becloud.workflow.graph;
 
+import tech.becloud.workflow.model.UserContext;
+
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class SubflowBuilder<T> extends NodeBuilder<T, SubflowBuilder<T>> {
+public class SubflowBuilder<T extends UserContext> extends NodeBuilder<T, SubflowBuilder<T>> {
     private final Flow<T> flow;
     private String nextNode;
 

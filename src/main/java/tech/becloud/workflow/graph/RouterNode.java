@@ -1,16 +1,17 @@
 package tech.becloud.workflow.graph;
 
+import tech.becloud.workflow.model.UserContext;
 import tech.becloud.workflow.model.WorkflowContext;
 import tech.becloud.workflow.persistence.PersistContextScope;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RouterNode<T> extends Node<T> {
+public class RouterNode<T extends UserContext> extends Node<T> {
 
     private final List<Route<? super T>> routes;
 
-    public RouterNode(String id, List<Route<? super T>> routes, String defaultRoute, List<ExceptionRoute> exceptionRoutes) {
+    public RouterNode(String id, List<Route<? super T>> routes, String defaultRoute, List<ExceptionRoute<T>> exceptionRoutes) {
         super(id, exceptionRoutes);
         ArrayList<Route<? super T>> allRoutes = new ArrayList<>(routes);
         allRoutes.add(new Route<>(t -> true, defaultRoute));

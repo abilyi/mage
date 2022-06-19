@@ -1,11 +1,13 @@
 package tech.becloud.workflow.graph;
 
+import tech.becloud.workflow.model.UserContext;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class FlowBuilder<T> {
+public class FlowBuilder<T extends UserContext> {
 
     public static final String ERROR_NO_BEAN_RESOLVER = "BeanResolver must be supplied to refer beans in FlowBuilder";
     public static final String NODE_ALREADY_EXIST = "Node with id %s already defined.";
@@ -15,13 +17,13 @@ public class FlowBuilder<T> {
     private String startNode;
     private final Map<String, NodeBuilder<T, ?>> nodeBuilders;
 
-    private FlowBuilder(Class<T> contextClass) {
+    public FlowBuilder(Class<T> contextClass) {
         this.contextClass = contextClass;
         nodeBuilders = new HashMap<>();
     }
 
-    public static <T> FlowBuilder<T> flowBuilderFor(Class<T> contextClass) {
-        return new FlowBuilder<>(contextClass);
+    public static <T extends UserContext> FlowBuilder<T> flowBuilderFor(Class<T> contextClass) {
+        return new FlowBuilder<T>(contextClass);
     }
 
     /**
@@ -56,7 +58,7 @@ public class FlowBuilder<T> {
         if (beanResolver == null) {
             throw new IllegalStateException(ERROR_NO_BEAN_RESOLVER);
         }
-        Consumer<T> action = beanResolver.getConsumer(beanName, contextClass);
+        Consumer<? super T> action = beanResolver.getConsumer(beanName, contextClass);
         return execute(id, action);
     }
 
@@ -72,7 +74,7 @@ public class FlowBuilder<T> {
         if (beanResolver == null) {
             throw new IllegalStateException(ERROR_NO_BEAN_RESOLVER);
         }
-        Consumer<T> action = beanResolver.getConsumer(id, contextClass);
+        Consumer<? super T> action = beanResolver.getConsumer(id, contextClass);
         return execute(id, action);
     }
 
@@ -156,7 +158,7 @@ public class FlowBuilder<T> {
      * Adds all nodes from given builder. In case of node name clash an {@link IllegalArgumentException}
      * is thrown unless clashing name references the same node builder.
      * @param builder A {@link FlowBuilder} to add nodes from
-     * @throws {@link IllegalArgumentException} on node name clash referencing different node builders
+     * @throws IllegalArgumentException on node name clash referencing different node builders
      */
     public void add(FlowBuilder<T> builder) {
         for (Map.Entry<String, NodeBuilder<T, ?>> entry : builder.nodeBuilders.entrySet()) {
