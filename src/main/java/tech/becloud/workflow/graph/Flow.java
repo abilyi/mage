@@ -88,4 +88,8 @@ public class Flow<T extends UserContext> implements Consumer<WorkflowContext<T>>
     public void setPersistContextScope(PersistContextScope persistContextScope) {
         nodes.forEach((id, node) -> node.setPersistenceScope(persistContextScope));
     }
+
+    public String getStartNode() {
+        return startNodeId;
+    }
 }

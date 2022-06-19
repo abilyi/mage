@@ -55,6 +55,7 @@ public class Workflow<T extends UserContext> {
         final ExecutionContext<T> executionContext = workflowContext.getExecutionContext();
         Optional.ofNullable(exceptionHandler).ifPresent(executionContext::setExceptionHandler);
         Optional.ofNullable(completionHandler).ifPresent(executionContext::setCompletionHandler);
+        executionContext.setExecutionPoint(flow.getStartNode());
         return executorService.submit(new FlowCallable<>(flow, workflowContext));
     }
 

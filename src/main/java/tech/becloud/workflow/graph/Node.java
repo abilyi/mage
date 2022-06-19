@@ -8,6 +8,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * Base class for all nodes. Provides exception handling with routing flow execution to distinct paths based on
+ * exception class,
+ * @param <T>
+ */
 public abstract class Node<T extends UserContext> implements Function<WorkflowContext<T>, String> {
 
     private final String id;
@@ -54,7 +59,8 @@ public abstract class Node<T extends UserContext> implements Function<WorkflowCo
     }
 
     /**
-     * @return Scope of context to be persisted. This is an optimization that allows to reduce amount of data to store.
+     * @return persistence scope of this step. Node may narrow the scope, excluding flow data or even disabling
+     * persistence completely
      */
     abstract PersistContextScope getPersistenceScope();
 
@@ -64,10 +70,16 @@ public abstract class Node<T extends UserContext> implements Function<WorkflowCo
     protected void exitNode(WorkflowContext<T> workflowContext) {
     }
 
+    /**
+     * @return step (node) id
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * @return {@link ExceptionRoute}s defining execution paths in case of exception, if any
+     */
     public List<ExceptionRoute<T>> getExceptionRoutes() {
         return exceptionRoutes;
     }
@@ -94,5 +106,4 @@ public abstract class Node<T extends UserContext> implements Function<WorkflowCo
     public void setPersistenceScope(PersistContextScope persistContextScope) {
         this.persistContextScope = persistContextScope;
     }
-
 }
