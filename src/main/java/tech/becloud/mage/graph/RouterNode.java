@@ -20,9 +20,9 @@ public class RouterNode<T extends UserContext> extends Node<T> {
 
     @Override
     public String executeAction(WorkflowContext<T> workflowContext) {
-        T context = workflowContext.getContext();
+        T userContext = workflowContext.getUserContext();
         for (Route<? super T> route : routes) {
-            if (route.predicate.test(context)) {
+            if (route.predicate.test(userContext)) {
                 return route.nodeId;
             }
         }

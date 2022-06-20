@@ -53,9 +53,9 @@ public class ActionNode<T extends UserContext> extends Node<T> {
 
     @Override
     protected String executeAction(WorkflowContext<T> workflowContext) {
-        T context = workflowContext.getContext();
-        if (predicate == null || predicate.test(context)) {
-            action.accept(context);
+        T userContext = workflowContext.getUserContext();
+        if (predicate == null || predicate.test(userContext)) {
+            action.accept(userContext);
         }
         return nextNodeId;
     }

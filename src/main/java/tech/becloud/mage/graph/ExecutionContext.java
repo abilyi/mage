@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 public class ExecutionContext<T> {
@@ -13,10 +14,12 @@ public class ExecutionContext<T> {
     private final int workflowVersion;
     private WorkflowExceptionHandler<T> exceptionHandler;
     private BiConsumer<? super T, ExecutionState> completionHandler;
-    private ExecutionState executionState;
+    private volatile ExecutionState executionState;
     private volatile boolean pauseRequested;
+    private volatile boolean canceled;
     private final List<String> currentNodePath;
     private int subflowDepth;
+    private CompletableFuture<Void> pausedCompletableFuture;
 
     public ExecutionContext(String workflowName, int workflowVersion, UUID executionId) {
         this.workflowName = workflowName;
@@ -136,4 +139,11 @@ public class ExecutionContext<T> {
         this.subflowDepth = subflowDepth;
     }
 
+    public CompletableFuture<Void> getPausedCompletableFuture() {
+        return pausedCompletableFuture;
+    }
+
+    public void setPausedCompletableFuture(CompletableFuture<Void> completableFuture) {
+        this.pausedCompletableFuture = completableFuture;
+    }
 }

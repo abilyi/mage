@@ -34,15 +34,17 @@ public class Flow<T extends UserContext> implements Consumer<WorkflowContext<T>>
             } catch (WokflowExecutionException e) {
                 execution.setExecutionState(ExecutionState.FAILED);
                 Optional.ofNullable(execution.getExceptionHandler()).ifPresent(
-                        eh -> eh.handle(context.getContext(), e.getCause(), e.getExecutionPath())
+                        eh -> eh.handle(context.getUserContext(), e.getCause(), e.getExecutionPath())
                 );
                 break;
             }
             execution.getCurrentNodePath().set(subflowLevel, currentNodeId);
-            persistContext(currentNode.getPersistenceScope(), context);
+            PersistContextScope persistenceScope = currentNode.getPersistenceScope();
+            persistContext(persistenceScope, context);
             if (execution.isPauseRequested()) {
                 execution.setExecutionState(ExecutionState.PAUSED);
                 execution.setPauseRequested(false);
+                execution.getPausedCompletableFuture().complete(null);
             }
         } while (currentNodeId != null && execution.getExecutionState() == ExecutionState.RUNNING);
         if (currentNodeId == null && subflowLevel == 0) {
@@ -51,7 +53,7 @@ public class Flow<T extends UserContext> implements Consumer<WorkflowContext<T>>
         final ExecutionState state = execution.getExecutionState();
         BiConsumer<? super T, ExecutionState> completionHandler = execution.getCompletionHandler();
         if (completionHandler != null && (state == ExecutionState.COMPLETED || state == ExecutionState.FAILED)) {
-            completionHandler.accept(context.getContext(), state);
+            completionHandler.accept(context.getUserContext(), state);
         }
     }
 
@@ -66,7 +68,7 @@ public class Flow<T extends UserContext> implements Consumer<WorkflowContext<T>>
             case USER:
                 ExecutionContext<T> execution = context.getExecutionContext();
                 workflowContextRepository.saveUserContext(execution.getExecutionId(), execution.getExecutionPoint(),
-                        context.getContext());
+                        context.getUserContext());
                 break;
             case ALL:
                 workflowContextRepository.save(context);

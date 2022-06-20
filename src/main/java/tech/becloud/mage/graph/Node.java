@@ -51,7 +51,7 @@ public abstract class Node<T extends UserContext> implements Function<WorkflowCo
         }
         for (ExceptionRoute<T> exceptionRoute: getExceptionRoutes()) {
             if (exceptionRoute.test(cause)) {
-                Optional.ofNullable(exceptionRoute.handler).ifPresent(h -> h.accept(context.getContext(), cause));
+                Optional.ofNullable(exceptionRoute.handler).ifPresent(h -> h.accept(context.getUserContext(), cause));
                 return exceptionRoute.nodeId;
             }
         }
@@ -93,14 +93,14 @@ public abstract class Node<T extends UserContext> implements Function<WorkflowCo
     }
 
     /**
-     * @return default scope of context to be persisted. Node still may reduce this scope for it's execution.
+     * @return default scope of context to be persisted. Node still may reduce this scope for its execution.
      */
     public PersistContextScope getPersistContextScope() {
         return persistContextScope;
     }
 
     /**
-     * Sets default scope of context to be persisted. Node still may reduce this scope for it's execution.
+     * Sets default scope of context to be persisted. Node still may reduce this scope for its execution.
      * @param persistContextScope
      */
     public void setPersistenceScope(PersistContextScope persistContextScope) {

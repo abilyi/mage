@@ -3,29 +3,37 @@ package tech.becloud.mage.model;
 import tech.becloud.mage.graph.ExecutionContext;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class WorkflowContext<T extends UserContext> {
     private final ExecutionContext<T> executionContext;
-    private final T context;
+    private final T userContext;
 
-    public WorkflowContext(ExecutionContext<T> executionContext, T context) {
+    public WorkflowContext(ExecutionContext<T> executionContext, T userContext) {
         this.executionContext = executionContext;
-        this.context = context;
+        this.userContext = userContext;
     }
 
     public ExecutionContext<T> getExecutionContext() {
         return executionContext;
     }
 
-    public T getContext() {
-        return context;
+    public T getUserContext() {
+        return userContext;
     }
 
     public UUID getExecutionId() {
         return executionContext.getExecutionId();
     }
 
-    public void requestPause() {
-        executionContext.setPauseRequested(true);
+    public CompletableFuture<Void> requestPause() {
+        if (executionContext.isPauseRequested()) {
+            CompletableFuture<Void> paused = new CompletableFuture<>();
+            executionContext.setPausedCompletableFuture(paused);
+            executionContext.setPauseRequested(true);
+            return paused;
+        } else {
+            return executionContext.getPausedCompletableFuture();
+        }
     }
 }

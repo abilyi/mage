@@ -19,10 +19,10 @@ class RouterNodeTest extends FlowTestBase {
         RouterNode<TestContext> node = new RouterNode<>("Route1", routes, "DefaultStep", exceptionRoutes);
         String path = node.apply(workflowContext);
         assertEquals("DefaultStep", path);
-        workflowContext.getContext().action2 = true;
+        workflowContext.getUserContext().action2 = true;
         path = node.apply(workflowContext);
         assertEquals("Step3", path);
-        workflowContext.getContext().action1 = true;
+        workflowContext.getUserContext().action1 = true;
         path = node.apply(workflowContext);
         assertEquals("Step2", path);
     }

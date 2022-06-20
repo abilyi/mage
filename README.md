@@ -50,3 +50,5 @@ node is defined earlier in the flow and You want to make a cycle.
 * It is safe use the same extra FlowBuilder several times, it will reference the same part of graph.
 * Use beans for consumers and predicates. If You find it boring to declare some of them as beans, provide a cache to
 bean resolver. This will allow You to use flow definitions once they get implemented.
+* Graceful shutdown with following resume if execution state persistence is enabled: request pause on all running flows,
+wait for all returned CompletableFuture(s) to complete. Still needs to access WorkflowContexts, working on it.
