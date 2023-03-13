@@ -25,18 +25,7 @@ public abstract class Node<T extends UserContext> implements Function<WorkflowCo
         this.exceptionRoutes = List.copyOf(exceptionRoutes);
     }
 
-    public String apply(WorkflowContext<T> context) {
-        enterNode(context);
-        try {
-            return executeAction(context);
-        } catch (Exception e) {
-            return routeOnException(e, context);
-        } finally {
-            exitNode(context);
-        }
-    }
-
-    protected abstract String executeAction(WorkflowContext<T> context);
+    public abstract String apply(WorkflowContext<T> context);
 
     protected String routeOnException(Exception e, WorkflowContext<T> context) {
         Throwable cause;
@@ -63,12 +52,6 @@ public abstract class Node<T extends UserContext> implements Function<WorkflowCo
      * persistence completely
      */
     abstract PersistContextScope getPersistenceScope();
-
-    protected void enterNode(WorkflowContext<T> workflowContext) {
-    }
-
-    protected void exitNode(WorkflowContext<T> workflowContext) {
-    }
 
     /**
      * @return step (node) id

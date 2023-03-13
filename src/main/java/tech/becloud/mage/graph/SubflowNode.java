@@ -7,7 +7,7 @@ import tech.becloud.mage.persistence.PersistContextScope;
 import java.util.List;
 import java.util.Optional;
 
-public class SubflowNode<T extends UserContext> extends Node<T> {
+public class SubflowNode<T extends UserContext> extends Node<T> implements FlowCompletionHandler<T> {
 
     private final Flow<T> flow;
     private final String nextNodeId;
@@ -19,25 +19,14 @@ public class SubflowNode<T extends UserContext> extends Node<T> {
     }
 
     @Override
-    protected String executeAction(WorkflowContext<T> context) {
-        flow.accept(context);
-        return nextNodeId;
-    }
-
-    @Override
-    protected void enterNode(WorkflowContext<T> workflowContext) {
-        ExecutionContext<T> execution = workflowContext.getExecutionContext();
-        execution.setSubflowDepth(execution.getSubflowDepth() + 1);
-        if (execution.getSubflowDepth() == execution.getCurrentNodePath().size()) {
-            execution.getCurrentNodePath().add(null);
-        }
-    }
-
-    @Override
-    protected void exitNode(WorkflowContext<T> workflowContext) {
-        ExecutionContext<T> execution = workflowContext.getExecutionContext();
-        execution.getCurrentNodePath().remove(execution.getSubflowDepth());
-        execution.setSubflowDepth(execution.getSubflowDepth() - 1);
+    public String apply(WorkflowContext<T> context) {
+        ExecutionContext<T> executionContext = context.getExecutionContext();
+        executionContext.pushFlowCall(flow, this);
+        return Optional.ofNullable(executionContext.getExecutionPoint())
+                .map(path -> path.split("/"))
+                .filter(sp -> sp.length >= executionContext.getSubflowDepth())
+                .map(sp -> sp[executionContext.getSubflowDepth() - 1])
+                .orElseGet(flow::getStartNode);
     }
 
     @Override
@@ -49,6 +38,11 @@ public class SubflowNode<T extends UserContext> extends Node<T> {
     public void setPersistenceScope(PersistContextScope persistContextScope) {
         this.persistContextScope = persistContextScope;
         flow.setPersistContextScope(persistContextScope);
+    }
+
+    @Override
+    public String handle(WorkflowContext<T> workflowContext, WokflowExecutionException ex) {
+        return (ex == null) ? nextNodeId : routeOnException(ex, workflowContext);
     }
 
     public Flow<T> getFlow() {

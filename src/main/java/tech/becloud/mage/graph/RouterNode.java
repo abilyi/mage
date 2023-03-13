@@ -19,14 +19,19 @@ public class RouterNode<T extends UserContext> extends Node<T> {
     }
 
     @Override
-    public String executeAction(WorkflowContext<T> workflowContext) {
-        T userContext = workflowContext.getUserContext();
-        for (Route<? super T> route : routes) {
-            if (route.predicate.test(userContext)) {
-                return route.nodeId;
+    public String apply(WorkflowContext<T> workflowContext) {
+        try {
+            T userContext = workflowContext.getUserContext();
+            for (Route<? super T> route : routes) {
+                if (route.predicate.test(userContext)) {
+                    return route.nodeId;
+                }
             }
+            throw new IllegalStateException("No default route found, abandon execution");
+        } catch (Exception e) {
+            return routeOnException(e, workflowContext);
         }
-        throw new IllegalStateException("No default route found, abandon execution");
+
     }
 
     @Override

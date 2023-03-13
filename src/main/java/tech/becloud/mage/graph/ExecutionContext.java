@@ -1,31 +1,42 @@
 package tech.becloud.mage.graph;
 
+import tech.becloud.mage.model.UserContext;
+import tech.becloud.mage.persistence.WorkflowContextRepository;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
-public class ExecutionContext<T> {
+public class ExecutionContext<T extends UserContext> {
     private String serviceInstanceId;
     private final UUID executionId;
     private final String workflowName;
     private final int workflowVersion;
+    private WorkflowContextRepository<T> workflowContextRepository;
     private WorkflowExceptionHandler<T> exceptionHandler;
     private BiConsumer<? super T, ExecutionState> completionHandler;
     private volatile ExecutionState executionState;
     private volatile boolean pauseRequested;
     private volatile boolean canceled;
-    private final List<String> currentNodePath;
-    private int subflowDepth;
-    private CompletableFuture<Void> pausedCompletableFuture;
+    private volatile String executionPoint;
+    private CompletableFuture<UUID> pausedCompletableFuture;
+    private ExecutorService executorService;
+    private final Deque<FlowCall<T>> flowCallStack;
 
     public ExecutionContext(String workflowName, int workflowVersion, UUID executionId) {
         this.workflowName = workflowName;
         this.workflowVersion = workflowVersion;
         this.executionId = executionId;
-        this.currentNodePath = new ArrayList<>();
+        this.executionPoint = null;
+        this.flowCallStack = new ConcurrentLinkedDeque<>();
     }
 
     /**
@@ -70,6 +81,14 @@ public class ExecutionContext<T> {
         return workflowVersion;
     }
 
+    WorkflowContextRepository<T> getWorkflowContextRepository() {
+        return workflowContextRepository;
+    }
+
+    void setWorkflowContextRepository(WorkflowContextRepository<T> workflowContextRepository) {
+        this.workflowContextRepository = workflowContextRepository;
+    }
+
     public WorkflowExceptionHandler<T> getExceptionHandler() {
         return exceptionHandler;
     }
@@ -98,7 +117,7 @@ public class ExecutionContext<T> {
      * @return
      */
     public String getExecutionPoint() {
-        return String.join("/", currentNodePath);
+        return executionPoint;
     }
 
     /**
@@ -106,12 +125,16 @@ public class ExecutionContext<T> {
      * @param executionPoint
      */
     public void setExecutionPoint(String executionPoint) {
-        currentNodePath.clear();
-        if (executionPoint == null || executionPoint.isEmpty()) {
-            return;
-        }
-        String[] path = executionPoint.split("/");
-        currentNodePath.addAll(Arrays.asList(path));
+        this.executionPoint = executionPoint;
+    }
+
+    String updateExecutionPoint() {
+        executionPoint = flowCallStack.stream().map(FlowCall::getNodeId).collect(Collectors.joining("/"));
+        return executionPoint;
+    }
+
+    int getSubflowDepth() {
+        return flowCallStack.size();
     }
 
     public boolean isPauseRequested() {
@@ -127,23 +150,31 @@ public class ExecutionContext<T> {
         this.pauseRequested = pauseRequested;
     }
 
-    List<String> getCurrentNodePath() {
-        return currentNodePath;
-    }
-
-    int getSubflowDepth() {
-        return subflowDepth;
-    }
-
-    void setSubflowDepth(int subflowDepth) {
-        this.subflowDepth = subflowDepth;
-    }
-
-    public CompletableFuture<Void> getPausedCompletableFuture() {
+    public CompletableFuture<UUID> getPausedCompletableFuture() {
         return pausedCompletableFuture;
     }
 
-    public void setPausedCompletableFuture(CompletableFuture<Void> completableFuture) {
+    public void setPausedCompletableFuture(CompletableFuture<UUID> completableFuture) {
         this.pausedCompletableFuture = completableFuture;
+    }
+
+    FlowCall<T> peekFlowCall() {
+        return flowCallStack.peek();
+    }
+
+    FlowCall<T> popFlowCall() {
+        return flowCallStack.pop();
+    }
+
+    void pushFlowCall(Flow<T> flow, FlowCompletionHandler<T> completionHandler) {
+        flowCallStack.push(new FlowCall<>(flow, completionHandler));
+    }
+
+    ExecutorService getExecutorService() {
+        return executorService;
+    }
+
+    void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
     }
 }

@@ -94,4 +94,11 @@ public class Flow<T extends UserContext> implements Consumer<WorkflowContext<T>>
     public String getStartNode() {
         return startNodeId;
     }
+
+    public Node<T> getNode(String nodeId) {
+        if (nodeId == null) {
+            nodeId = startNodeId;
+        }
+        return nodes.get(nodeId);
+    }
 }

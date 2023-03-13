@@ -52,12 +52,16 @@ public class ActionNode<T extends UserContext> extends Node<T> {
     }
 
     @Override
-    protected String executeAction(WorkflowContext<T> workflowContext) {
-        T userContext = workflowContext.getUserContext();
-        if (predicate == null || predicate.test(userContext)) {
-            action.accept(userContext);
+    public String apply(WorkflowContext<T> workflowContext) {
+        try {
+            T userContext = workflowContext.getUserContext();
+            if (predicate == null || predicate.test(userContext)) {
+                action.accept(userContext);
+            }
+            return nextNodeId;
+        } catch (Exception e) {
+            return routeOnException(e, workflowContext);
         }
-        return nextNodeId;
     }
 
     @Override

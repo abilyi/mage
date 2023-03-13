@@ -26,9 +26,9 @@ public class WorkflowContext<T extends UserContext> {
         return executionContext.getExecutionId();
     }
 
-    public CompletableFuture<Void> requestPause() {
+    public CompletableFuture<UUID> requestPause() {
         if (executionContext.isPauseRequested()) {
-            CompletableFuture<Void> paused = new CompletableFuture<>();
+            CompletableFuture<UUID> paused = new CompletableFuture<>();
             executionContext.setPausedCompletableFuture(paused);
             executionContext.setPauseRequested(true);
             return paused;
